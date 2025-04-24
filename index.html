@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Premium Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      body {
+        background-image: url('https://images.unsplash.com/photo-1643208589896-07b8feb4dffa?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHNwb3RpZnl8ZW58MHx8MHx8fDA%3D');
+        background-size: cover;
+        background-position: center;
+      }
+      .song-card:hover .play-icon {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .progress-bar {
+        -webkit-appearance: none;
+        height: 6px;
+        background: #4d4d4d;
+        border-radius: 3px;
+      }
+      .progress-bar::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #1DB954;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="bg-black bg-opacity-90 text-white font-sans">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="h-screen w-screen flex flex-col justify-center items-center bg-gradient-to-b from-black/80 to-green-900/90 backdrop-blur">
+      <div class="text-center mb-8">
+        <i class="fab fa-spotify text-6xl text-green-500 mb-4"></i>
+        <h1 class="text-4xl font-extrabold mb-2">Welcome to Spotify Premium</h1>
+        <p class="text-gray-300">Enjoy ad-free music, offline listening, and more</p>
+      </div>
+      
+      <div class="w-full max-w-md bg-black bg-opacity-70 rounded-lg p-8">
+        <div class="mb-6">
+          <label class="block text-gray-300 mb-2">Email address</label>
+          <input class="w-full px-4 py-3 rounded bg-gray-800 text-white" type="email" id="email" placeholder="name@domain.com" required />
+        </div>
+        <div class="mb-6">
+          <label class="block text-gray-300 mb-2">Password</label>
+          <input class="w-full px-4 py-3 rounded bg-gray-800 text-white" type="password" id="password" placeholder="Enter your password" />
+        </div>
+        <button onclick="startApp()" class="w-full bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full text-white font-bold transition duration-300 mb-4">
+          Log In
+        </button>
+        <div class="text-center">
+          <a href="#" class="text-gray-400 hover:text-white text-sm">Forgot password?</a>
+          <p class="text-gray-400 mt-4">Don't have an account? <a href="#" class="text-white hover:underline">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden h-screen overflow-hidden flex flex-col">
+      <!-- Header -->
+      <header class="bg-black text-white px-6 py-4 flex justify-between items-center border-b border-gray-800">
+        <div class="flex items-center">
+          <i class="fab fa-spotify text-3xl text-green-500 mr-2"></i>
+          <h1 class="text-2xl font-bold">Spotify Premium</h1>
+        </div>
+        
+        <div class="flex-1 max-w-xl mx-4">
+          <div class="relative">
+            <input type="text" id="searchInput" placeholder="Search for songs, artists, or albums" 
+                   class="w-full bg-gray-800 rounded-full px-4 py-2 pl-10 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+        
+        <div class="flex gap-4 items-center">
+          <button onclick="showPremium()" class="bg-white hover:bg-gray-200 text-black px-4 py-1 rounded-full text-sm font-bold transition duration-300">
+            Premium
+          </button>
+          <div class="flex items-center cursor-pointer" onclick="showProfile()">
+            <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mr-2">
+              <i class="fas fa-user text-sm"></i>
+            </div>
+            <span>User</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <div class="bg-black px-6 py-3 flex overflow-x-auto scrollbar-hide">
+        <button class="px-4 py-1 rounded-full bg-green-600 text-white mr-3 whitespace-nowrap">All</button>
+        <button class="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-white mr-3 whitespace-nowrap">New Releases</button>
+        <button class="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-white mr-3 whitespace-nowrap">Old Classics</button>
+        <button class="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-white mr-3 whitespace-nowrap">Playlists</button>
+        <button class="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-white mr-3 whitespace-nowrap">Artists</button>
+        <button class="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-white mr-3 whitespace-nowrap">Albums</button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <!-- Featured Section -->
+        <section class="mb-8">
+          <h2 class="text-2xl font-bold mb-4">Featured Playlists</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div class="bg-gradient-to-br from-purple-900 to-blue-800 rounded-lg p-4 cursor-pointer hover:opacity-90 transition">
+              <div class="relative mb-3">
+                <img src="https://i.scdn.co/image/ab67706f00000002ec9d60059aa215a7ba364695" alt="Playlist" class="w-full rounded shadow-lg">
+                <button class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2">
+                  <i class="fas fa-play text-black"></i>
+                </button>
+              </div>
+              <h3 class="font-bold">Today's Top Hits</h3>
+              <p class="text-gray-400 text-sm">By Spotify</p>
+            </div>
+            <div class="bg-gradient-to-br from-red-900 to-orange-800 rounded-lg p-4 cursor-pointer hover:opacity-90 transition">
+              <div class="relative mb-3">
+                <img src="https://i.scdn.co/image/ab67706f00000002ca5a7517156021292e5663a6" alt="Playlist" class="w-full rounded shadow-lg">
+                <button class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2">
+                  <i class="fas fa-play text-black"></i>
+                </button>
+              </div>
+              <h3 class="font-bold">Bollywood Hits</h3>
+              <p class="text-gray-400 text-sm">By Spotify</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-900 to-teal-800 rounded-lg p-4 cursor-pointer hover:opacity-90 transition">
+              <div class="relative mb-3">
+                <img src="https://i.scdn.co/image/ab67706f00000002e4eaddf5e4c6b9b4e3822b3f" alt="Playlist" class="w-full rounded shadow-lg">
+                <button class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2">
+                  <i class="fas fa-play text-black"></i>
+                </button>
+              </div>
+              <h3 class="font-bold">90s Classics</h3>
+              <p class="text-gray-400 text-sm">By Spotify</p>
+            </div>
+            <div class="bg-gradient-to-br from-yellow-900 to-amber-800 rounded-lg p-4 cursor-pointer hover:opacity-90 transition">
+              <div class="relative mb-3">
+                <img src="https://i.scdn.co/image/ab67706f0000000254473de875fea0fd19d39037" alt="Playlist" class="w-full rounded shadow-lg">
+                <button class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2">
+                  <i class="fas fa-play text-black"></i>
+                </button>
+              </div>
+              <h3 class="font-bold">Romantic Hits</h3>
+              <p class="text-gray-400 text-sm">By Spotify</p>
+            </div>
+            <div class="bg-gradient-to-br from-blue-900 to-indigo-800 rounded-lg p-4 cursor-pointer hover:opacity-90 transition">
+              <div class="relative mb-3">
+                <img src="https://i.scdn.co/image/ab67706f00000002a76a2ccb454ff0e1720a51a5" alt="Playlist" class="w-full rounded shadow-lg">
+                <button class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2">
+                  <i class="fas fa-play text-black"></i>
+                </button>
+              </div>
+              <h3 class="font-bold">Workout Mix</h3>
+              <p class="text-gray-400 text-sm">By Spotify</p>
+            </div>
+            <div class="bg-gradient-to-br from-pink-900 to-rose-800 rounded-lg p-4 cursor-pointer hover:opacity-90 transition">
+              <div class="relative mb-3">
+                <img src="https://i.scdn.co/image/ab67706f00000002d72ef75e14ca6f60ea2364c2" alt="Playlist" class="w-full rounded shadow-lg">
+                <button class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2">
+                  <i class="fas fa-play text-black"></i>
+                </button>
+              </div>
+              <h3 class="font-bold">Chill Vibes</h3>
+              <p class="text-gray-400 text-sm">By Spotify</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- New Releases -->
+        <section class="mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">New Releases</h2>
+            <a href="#" class="text-gray-400 hover:text-white text-sm">See all</a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" id="newSongs"></div>
+        </section>
+
+        <!-- Old Classics -->
+        <section class="mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Old Classics</h2>
+            <a href="#" class="text-gray-400 hover:text-white text-sm">See all</a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" id="oldSongs"></div>
+        </section>
+
+        <!-- Your Favorites -->
+        <section class="mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Your Favorites</h2>
+            <a href="#" class="text-gray-400 hover:text-white text-sm">See all</a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" id="favoriteSongs"></div>
+        </section>
+      </div>
+
+      <!-- Player -->
+      <footer class="bg-gray-900 border-t border-gray-800 flex items-center px-4 py-2">
+        <div class="flex items-center w-1/4">
+          <img id="currentSongImg" src="https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228" alt="Album Cover" class="w-14 h-14 rounded mr-3">
+          <div>
+            <h4 id="currentSong" class="text-sm font-semibold">Not Playing</h4>
+            <p id="currentArtist" class="text-xs text-gray-400"></p>
+          </div>
+          <button id="likeBtn" class="ml-4 text-gray-400 hover:text-white">
+            <i class="far fa-heart"></i>
+          </button>
+        </div>
+        
+        <div class="flex flex-col items-center w-2/4">
+          <div class="flex items-center mb-2">
+            <button class="mx-2 text-gray-400 hover:text-white">
+              <i class="fas fa-random"></i>
+            </button>
+            <button id="prevBtn" class="mx-2 text-gray-400 hover:text-white">
+              <i class="fas fa-step-backward"></i>
+            </button>
+            <button id="playPauseBtn" class="mx-3 bg-white text-black w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 transition">
+              <i class="fas fa-play text-xs"></i>
+            </button>
+            <button id="nextBtn" class="mx-2 text-gray-400 hover:text-white">
+              <i class="fas fa-step-forward"></i>
+            </button>
+            <button class="mx-2 text-gray-400 hover:text-white">
+              <i class="fas fa-redo"></i>
+            </button>
+          </div>
+          <div class="w-full flex items-center">
+            <span id="currentTime" class="text-xs text-gray-400 mr-2">0:00</span>
+            <input type="range" id="progressBar" value="0" class="w-full progress-bar">
+            <span id="duration" class="text-xs text-gray-400 ml-2">0:00</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-end w-1/4">
+          <button class="mx-2 text-gray-400 hover:text-white">
+            <i class="fas fa-list"></i>
+          </button>
+          <button class="mx-2 text-gray-400 hover:text-white">
+            <i class="fas fa-laptop"></i>
+          </button>
+          <div class="flex items-center ml-4">
+            <i class="fas fa-volume-up text-gray-400 mr-2"></i>
+            <input type="range" id="volumeControl" value="80" class="w-24 progress-bar">
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Premium Modal -->
+    <div id="premiumModal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+      <div class="bg-gray-900 rounded-lg max-w-2xl w-full p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">Spotify Premium</h2>
+          <button onclick="hidePremium()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-2">Individual</h3>
+            <p class="text-gray-400 mb-4">₹119/month after offer period</p>
+            <ul class="mb-6">
+              <li class="flex items-center mb-2"><i class="fas fa-check text-green-500 mr-2"></i> Ad-free music listening</li>
+              <li class="flex items-center mb-2"><i class="fas fa-check text-green-500 mr-2"></i> Play anywhere - even offline</li>
+              <li class="flex items-center mb-2"><i class="fas fa-check text-green-500 mr-2"></i> On-demand playback</li>
+            </ul>
+            <button class="w-full bg-white text-black py-3 rounded-full font-bold hover:bg-gray-200 transition">Get Started</button>
+          </div>
+          
+          <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-2">Family</h3>
+            <p class="text-gray-400 mb-4">₹179/month after offer period</p>
+            <ul class="mb-6">
+              <li class="flex items-center mb-2"><i class="fas fa-check text-green-500 mr-2"></i> 6 Premium accounts for family members</li>
+              <li class="flex items-center mb-2"><i class="fas fa-check text-green-500 mr-2"></i> Block explicit music</li>
+              <li class="flex items-center mb-2"><i class="fas fa-check text-green-500 mr-2"></i> Ad-free music listening, play offline, on-demand</li>
+            </ul>
+            <button class="w-full bg-white text-black py-3 rounded-full font-bold hover:bg-gray-200 transition">Get Started</button>
+          </div>
+        </div>
+        
+        <p class="text-gray-400 text-sm">Terms and conditions apply. 1 month free not available for users who have already tried Premium.</p>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div id="profileDropdown" class="hidden absolute right-4 top-16 bg-gray-800 rounded shadow-lg z-50 w-48 py-1">
+      <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-700">Account</a>
+      <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-700">Profile</a>
+      <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
+      <div class="border-t border-gray-700 my-1"></div>
+      <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-700">Log out</a>
+    </div>
+
+    <script>
+      // Enhanced music data with categories and favorites
+      const songs = [
+        // New Releases
+        { 
+          id: 1,
+          title: "Kesariya", 
+          artist: "Arijit Singh", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", 
+          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVgVeqRQSLoPNAi4_oxMvK4lb3nVMwMPgunA&s",
+          category: "new",
+          duration: 203,
+          liked: false
+        },
+        { 
+          id: 2,
+          title: "Naatu Naatu", 
+          artist: "Rahul Sipligunj", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", 
+          img: "https://i.scdn.co/image/ab67616d0000b273660d1b3338909504fd6f995a",
+          category: "new",
+          duration: 213,
+          liked: true
+        },
+        { 
+          id: 3,
+          title: "Pasoori Nu", 
+          artist: "Arijit Singh", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", 
+          img: "https://i.ytimg.com/vi/32E7dReissc/maxresdefault.jpg",
+          category: "new",
+          duration: 187,
+          liked: false
+        },
+        { 
+          id: 4,
+          title: "Raataan Lambiyan", 
+          artist: "Tanishk Bagchi", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", 
+          img: "https://c.saavncdn.com/222/Raataan-Lambiyan-From-Shershaah--Hindi-2021-20210729181107-500x500.jpg",
+          category: "new",
+          duration: 221,
+          liked: true
+        },
+        
+        // Old Classics
+        { 
+          id: 5,
+          title: "Tum Hi Ho", 
+          artist: "Arijit Singh", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", 
+          img: "https://i.ytimg.com/vi/asxmdFaIock/maxresdefault.jpg",
+          category: "old",
+          duration: 254,
+          liked: true
+        },
+        { 
+          id: 6,
+          title: "Tere Bina", 
+          artist: "A.R. Rahman", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", 
+          img: "https://images.unsplash.com/photo-1658992485351-d82f8877490b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y291cGxlfGVufDB8fDB8fHww",
+          category: "old",
+          duration: 312,
+          liked: false
+        },
+        { 
+          id: 7,
+          title: "Kal Ho Naa Ho", 
+          artist: "Sonu Nigam", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", 
+          img: "https://storage.googleapis.com/impact-news-photo/news-photo/9343.Untitled%20design%20(8).jpg",
+          category: "old",
+          duration: 301,
+          liked: true
+        },
+        { 
+          id: 8,
+          title: "Dil Se Re", 
+          artist: "A.R. Rahman", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", 
+          img: "https://images.unsplash.com/photo-1737441834936-107f1b9f62c5?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          category: "old",
+          duration: 278,
+          liked: false
+        },
+        
+        // Additional songs
+        { 
+          id: 9,
+          title: "Channa Mereya", 
+          artist: "Arijit Singh", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", 
+          img: "https://i.ytimg.com/vi/jglVv0JfZUc/maxresdefault.jpg",
+          category: "new",
+          duration: 267,
+          liked: false
+        },
+        { 
+          id: 10,
+          title: "Agar Tum Saath Ho", 
+          artist: "Alka Yagnik & Arijit Singh", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", 
+          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOULc7k-1Xz-waHbWlaSbU_yfaAfU0s3WvVQ&s",
+          category: "new",
+          duration: 312,
+          liked: true
+        },
+        { 
+          id: 11,
+          title: "Dum Maro Dum", 
+          artist: "Asha Bhosale", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3", 
+          img: "https://i.ytimg.com/vi/H4V642c8ZpY/maxresdefault.jpg",
+          category: "old",
+          duration: 189,
+          liked: false
+        },
+        { 
+          id: 12,
+          title: "Tera Mujhse Hai Pehle", 
+          artist: "K.K.", 
+          file: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3", 
+          img: "https://i.ytimg.com/vi/VffkRtHps4w/maxresdefault.jpg",
+          category: "old",
+          duration: 276,
+          liked: true
+        }
+      ];
+
+      // App state
+      let currentIndex = null;
+      let isPlaying = false;
+      let audio = new Audio();
+      let totalSongsPlayed = 0;
+      let totalListeningTime = 0;
+      let likedSongs = songs.filter(song => song.liked);
+      let newSongs = songs.filter(song => song.category === "new");
+      let oldSongs = songs.filter(song => song.category === "old");
+
+      // DOM elements
+      const playPauseBtn = document.getElementById("playPauseBtn");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const likeBtn = document.getElementById("likeBtn");
+      const progressBar = document.getElementById("progressBar");
+      const volumeControl = document.getElementById("volumeControl");
+      const searchInput = document.getElementById("searchInput");
+
+      // Initialize the app
+      function startApp() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        
+        if (!email || !password) {
+          alert("Please enter both email and password.");
+          return;
+        }
+        
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("app").style.display = "flex";
+        renderSongs();
+      }
+
+      // Render songs in their respective sections
+      function renderSongs() {
+        renderNewSongs();
+        renderOldSongs();
+        renderFavoriteSongs();
+      }
+
+      function renderNewSongs() {
+        const container = document.getElementById("newSongs");
+        container.innerHTML = "";
+        newSongs.forEach((song) => {
+          container.innerHTML += createSongCard(song);
+        });
+      }
+
+      function renderOldSongs() {
+        const container = document.getElementById("oldSongs");
+        container.innerHTML = "";
+        oldSongs.forEach((song) => {
+          container.innerHTML += createSongCard(song);
+        });
+      }
+
+      function renderFavoriteSongs() {
+        const container = document.getElementById("favoriteSongs");
+        container.innerHTML = "";
+        likedSongs.forEach((song) => {
+          container.innerHTML += createSongCard(song);
+        });
+      }
+
+      // Create song card HTML
+      function createSongCard(song) {
+        return `
+          <div class="song-card bg-gray-800 hover:bg-gray-700 rounded-lg p-4 transition cursor-pointer group">
+            <div class="relative mb-3">
+              <img src="${song.img}" alt="${song.title}" class="w-full rounded shadow-lg">
+              <button onclick="playSong(${song.id})" class="absolute bottom-2 right-2 bg-green-500 w-10 h-10 rounded-full flex items-center justify-center opacity-0 play-icon transition transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
+                <i class="fas fa-play text-black"></i>
+              </button>
+              <div class="absolute top-2 right-2">
+                <button onclick="toggleLike(${song.id}, event)" class="bg-black bg-opacity-70 w-8 h-8 rounded-full flex items-center justify-center">
+                  <i class="${song.liked ? 'fas' : 'far'} fa-heart ${song.liked ? 'text-green-500' : 'text-white'}"></i>
+                </button>
+              </div>
+            </div>
+            <h3 class="font-bold truncate">${song.title}</h3>
+            <p class="text-sm text-gray-400 truncate">${song.artist}</p>
+            <button onclick="addToQueue(${song.id}, event)" class="mt-2 text-xs text-gray-400 hover:text-white flex items-center">
+              <i class="fas fa-plus mr-1"></i> Add to queue
+            </button>
+          </div>
+        `;
+      }
+
+      // Play a song by ID
+      function playSong(id) {
+        const songIndex = songs.findIndex(song => song.id === id);
+        if (songIndex === -1) return;
+        
+        const song = songs[songIndex];
+        audio.src = song.file;
+        audio.play();
+        isPlaying = true;
+        currentIndex = songIndex;
+        totalSongsPlayed++;
+        
+        // Update player UI
+        playPauseBtn.innerHTML = '<i class="fas fa-pause text-xs"></i>';
+        document.getElementById("currentSong").textContent = song.title;
+        document.getElementById("currentArtist").textContent = song.artist;
+        document.getElementById("currentSongImg").src = song.img;
+        document.getElementById("duration").textContent = formatTime(song.duration);
+        
+        // Update like button
+        likeBtn.innerHTML = `<i class="${song.liked ? 'fas' : 'far'} fa-heart ${song.liked ? 'text-green-500' : 'text-gray-400'}"></i>`;
+        
+        // Add to recently played
+        if (!song.liked) {
+          song.liked = true;
+          likedSongs.push(song);
+          renderFavoriteSongs();
+        }
+      }
+
+      // Toggle play/pause
+      function togglePlay() {
+        if (!audio.src) {
+          if (songs.length > 0) {
+            playSong(songs[0].id);
+          }
+          return;
+        }
+        
+        if (isPlaying) {
+          audio.pause();
+          isPlaying = false;
+          playPauseBtn.innerHTML = '<i class="fas fa-play text-xs"></i>';
+        } else {
+          audio.play();
+          isPlaying = true;
+          playPauseBtn.innerHTML = '<i class="fas fa-pause text-xs"></i>';
+        }
+      }
+
+      // Play next song
+      function playNext() {
+        if (currentIndex === null || currentIndex >= songs.length - 1) {
+          currentIndex = 0;
+        } else {
+          currentIndex++;
+        }
+        playSong(songs[currentIndex].id);
+      }
+
+      // Play previous song
+      function playPrev() {
+        if (currentIndex === null || currentIndex <= 0) {
+          currentIndex = songs.length - 1;
+        } else {
+          currentIndex--;
+        }
+        playSong(songs[currentIndex].id);
+      }
+
+      // Toggle like status for a song
+      function toggleLike(id, event) {
+        event.stopPropagation();
+        const songIndex = songs.findIndex(song => song.id === id);
+        if (songIndex === -1) return;
+        
+        songs[songIndex].liked = !songs[songIndex].liked;
+        
+        // Update liked songs list
+        likedSongs = songs.filter(song => song.liked);
+        
+        // Re-render affected sections
+        renderFavoriteSongs();
+        
+        // If current song is liked/unliked, update the like button
+        if (currentIndex !== null && songs[currentIndex].id === id) {
+          likeBtn.innerHTML = `<i class="${songs[songIndex].liked ? 'fas' : 'far'} fa-heart ${songs[songIndex].liked ? 'text-green-500' : 'text-gray-400'}"></i>`;
+        }
+        
+        // Update the specific song card
+        const card = event.target.closest('.song-card');
+        if (card) {
+          const likeIcon = card.querySelector('.fa-heart');
+          likeIcon.className = `${songs[songIndex].liked ? 'fas' : 'far'} fa-heart ${songs[songIndex].liked ? 'text-green-500' : 'text-white'}`;
+        }
+      }
+
+      // Add song to queue
+      function addToQueue(id, event) {
+        event.stopPropagation();
+        alert(`Song with ID ${id} added to queue`);
+        // In a real app, this would add to a queue array
+      }
+
+      // Format time (seconds to MM:SS)
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }
+
+      // Show premium modal
+      function showPremium() {
+        document.getElementById("premiumModal").classList.remove("hidden");
+      }
+
+      // Hide premium modal
+      function hidePremium() {
+        document.getElementById("premiumModal").classList.add("hidden");
+      }
+
+      // Show profile dropdown
+      function showProfile() {
+        document.getElementById("profileDropdown").classList.toggle("hidden");
+      }
+
+      // Close profile dropdown when clicking elsewhere
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('#profileDropdown') && !event.target.closest('.flex.items-center.cursor-pointer')) {
+          document.getElementById("profileDropdown").classList.add("hidden");
+        }
+      });
+
+      // Search functionality
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        if (searchTerm.length > 0) {
+          const filteredSongs = songs.filter(song => 
+            song.title.toLowerCase().includes(searchTerm) || 
+            song.artist.toLowerCase().includes(searchTerm)
+          );
+          
+          // In a real app, you would display search results
+          console.log("Search results:", filteredSongs);
+        }
+      });
+
+      // Event listeners
+      playPauseBtn.addEventListener('click', togglePlay);
+      prevBtn.addEventListener('click', playPrev);
+      nextBtn.addEventListener('click', playNext);
+      likeBtn.addEventListener('click', function() {
+        if (currentIndex !== null) {
+          toggleLike(songs[currentIndex].id, {stopPropagation: () => {}});
+        }
+      });
+
+      // Update progress bar
+      audio.addEventListener('timeupdate', () => {
+        progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
+        document.getElementById("currentTime").textContent = formatTime(audio.currentTime);
+        totalListeningTime = Math.floor(audio.currentTime);
+      });
+
+      // Seek functionality
+      progressBar.addEventListener('input', () => {
+        audio.currentTime = (progressBar.value * audio.duration) / 100;
+      });
+
+      // Volume control
+      volumeControl.addEventListener('input', () => {
+        audio.volume = volumeControl.value / 100;
+      });
+
+      // Song ended
+      audio.addEventListener('ended', playNext);
+
+      // Initialize volume
+      audio.volume = volumeControl.value / 100;
+    </script>
+  </body>
+</html>
